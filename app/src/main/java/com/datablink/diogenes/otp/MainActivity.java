@@ -19,6 +19,8 @@ public class MainActivity extends AppCompatActivity {
     TextView otpNumberText;
     TextView tokenLabelText;
 
+    QRCodeData mData;
+
     class QRCodeData {
         String key;
         String label;
@@ -41,17 +43,10 @@ public class MainActivity extends AppCompatActivity {
 
         if(storedData != null){
 
-            // Show data label
-            tokenLabelText.setText(storedData.label);
-
             // Disable getKey Button
             getKeyButton.setVisibility(View.INVISIBLE);
 
-            // Generate a new OTP with stored key and show it.
-            int otpNumber = getOTP(storedData.key);
-            otpNumberText.setText(Integer.toString(otpNumber));
-            updateOtpRealTime();
-
+            updateLabels();
 
         }
 
@@ -64,10 +59,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if(result != null) {
-            if(result.getContents() == null) {
-                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+            if(result.getContents() != null) {
+
+                Log.d("QR Code Scanned", result.getContents());
+
+                mData = getQRCodeData(result.getContents());
+                saveData(mData);
+
+                updateLabels();
+
             } else {
-                Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+
+                Log.d("QR Code Scanned", "Cancelled");
+
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -82,17 +86,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d("Clicked", "getKeyClick");
 
         // Read QRCodeData and save it
-        QRCodeData readData = readQRCode();
-        saveData(readData);
-
-        // Show label
-        tokenLabelText.setText(readData.label);
-
-        // Generate OTP and show it
-        int otpNumber = getOTP(readData.key);
-        otpNumberText.setText(Integer.toString(otpNumber));
-        updateOtpRealTime();
-
+        readQRCode();
 
     }
 
@@ -148,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public QRCodeData readQRCode(){
+    public void readQRCode(){
 
         IntentIntegrator integrator = new IntentIntegrator(this);
         integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
@@ -159,12 +153,24 @@ public class MainActivity extends AppCompatActivity {
         integrator.setBarcodeImageEnabled(true);
         integrator.initiateScan();
 
+    }
+
+    public QRCodeData getQRCodeData(String content){
+
+        // Process String and return QRCodeData
+
         return new QRCodeData();
 
     }
 
-    public void updateOtpRealTime(){
+    public void updateLabels(){
 
+        // Show label
+        tokenLabelText.setText(mData.label);
+
+        // Generate OTP and show it
+        int otpNumber = getOTP(mData.key);
+        otpNumberText.setText(Integer.toString(otpNumber));
 
     }
 
