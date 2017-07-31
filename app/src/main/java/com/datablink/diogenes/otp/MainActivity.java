@@ -61,10 +61,16 @@ public class MainActivity extends AppCompatActivity {
         Log.d("Clicked", "getKeyClick");
 
         // Read QRCodeData and save it
+        QRCodeData readData = readQRCode();
+        saveData(readData);
 
         // Show label
+        tokenLabelText.setText(readData.label);
 
         // Generate OTP and show it
+        int otpNumber = getOTP(readData.key);
+        otpNumberText.setText(Integer.toString(otpNumber));
+        updateOtpRealTime();
 
 
     }
@@ -73,6 +79,20 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d("Clicked", "deleteDataClick");
 
+        if(deleteData()){
+
+            // Success
+            Log.d("Success", "deleteData");
+
+            getKeyButton.setVisibility(View.VISIBLE);
+
+        }else{
+
+            // Error
+            Log.d("Error", "deleteData");
+
+
+        }
 
     }
 
