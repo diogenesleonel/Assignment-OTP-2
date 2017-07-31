@@ -14,6 +14,8 @@ import com.google.zxing.integration.android.IntentResult;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
+
 public class MainActivity extends AppCompatActivity {
 
     Button getKeyButton;
@@ -22,11 +24,6 @@ public class MainActivity extends AppCompatActivity {
     TextView tokenLabelText;
 
     QRCodeData mData;
-
-    class QRCodeData {
-        String key;
-        String label;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
 
                 Log.d("QR Code Scanned", result.getContents());
 
-                mData = getQRCodeData(result.getContents());
+                mData = new QRCodeData(result.getContents());
                 saveData(mData);
 
                 updateLabels();
@@ -157,40 +154,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public QRCodeData getQRCodeData(String content){
-
-        // Process String and return QRCodeData object
-
-        try {
-
-            JSONObject json = new JSONObject(content);
-
-            QRCodeData data =  new QRCodeData();
-            data.key = json.getString("key");
-            data.label = json.getString("label");
-
-            Log.d("key", data.key);
-            Log.d("label", data.label);
-
-            return data;
-
-
-        } catch (JSONException e) {
-
-            e.printStackTrace();
-
-        }
-
-        return null;
-    }
 
     public void updateLabels(){
 
         // Show label
-        tokenLabelText.setText(mData.label);
+        tokenLabelText.setText(mData.getLabel());
 
         // Generate OTP and show it
-        int otpNumber = getOTP(mData.key);
+        int otpNumber = getOTP(mData.getKey());
         otpNumberText.setText(Integer.toString(otpNumber));
 
     }
@@ -213,4 +184,46 @@ public class MainActivity extends AppCompatActivity {
     // Example of a call to a native method
     //TextView tv = (TextView) findViewById(R.id.sample_text);
     //tv.setText(stringFromJNI());
+}
+
+
+class QRCodeData {
+
+    private String key;
+    private String label;
+
+    public QRCodeData(String content){
+
+        // Process String and return QRCodeData object
+
+        try {
+
+            JSONObject json = new JSONObject(content);
+
+            this.key = json.getString("key");
+            this.label = json.getString("label");
+
+            Log.d("key", key);
+            Log.d("label", label);
+
+
+        } catch (JSONException e) {
+
+            e.printStackTrace();
+
+        }
+
+    }
+
+
+    public String getKey() {
+        return key;
+    }
+
+
+    public String getLabel() {
+        return label;
+    }
+
+
 }
