@@ -1,11 +1,16 @@
 package com.datablink.diogenes.otp;
 
-import android.support.v7.app.AppCompatActivity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
         tokenLabelText = (TextView) findViewById(R.id.labelText);
 
 
+
         // Try to load stored data
         QRCodeData storedData = loadData();
 
@@ -51,6 +57,21 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    }
+
+    // Get QR Code String:
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if(result != null) {
+            if(result.getContents() == null) {
+                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     //--------------------------------- Button Listeners------------------------------------------//
@@ -108,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
 
     public QRCodeData loadData(){
 
-        return new QRCodeData();
+        return null;
 
     }
 
@@ -129,6 +150,15 @@ public class MainActivity extends AppCompatActivity {
 
     public QRCodeData readQRCode(){
 
+        IntentIntegrator integrator = new IntentIntegrator(this);
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
+        integrator.setPrompt("Scan QR Code");
+        integrator.setCameraId(0);  // Use a specific camera of the device
+        integrator.setOrientationLocked(false);
+        integrator.setBeepEnabled(true);
+        integrator.setBarcodeImageEnabled(true);
+        integrator.initiateScan();
+
         return new QRCodeData();
 
     }
@@ -137,6 +167,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
 
 
     //--------------------------------------- JNI ------------------------------------------------//
