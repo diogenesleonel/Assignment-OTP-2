@@ -7,10 +7,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -147,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
         IntentIntegrator integrator = new IntentIntegrator(this);
         integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
         integrator.setPrompt("Scan QR Code");
-        integrator.setCameraId(0);  // Use a specific camera of the device
+        integrator.setCameraId(0);
         integrator.setOrientationLocked(false);
         integrator.setBeepEnabled(true);
         integrator.setBarcodeImageEnabled(true);
@@ -157,10 +159,29 @@ public class MainActivity extends AppCompatActivity {
 
     public QRCodeData getQRCodeData(String content){
 
-        // Process String and return QRCodeData
+        // Process String and return QRCodeData object
 
-        return new QRCodeData();
+        try {
 
+            JSONObject json = new JSONObject(content);
+
+            QRCodeData data =  new QRCodeData();
+            data.key = json.getString("key");
+            data.label = json.getString("label");
+
+            Log.d("key", data.key);
+            Log.d("label", data.label);
+
+            return data;
+
+
+        } catch (JSONException e) {
+
+            e.printStackTrace();
+
+        }
+
+        return null;
     }
 
     public void updateLabels(){
