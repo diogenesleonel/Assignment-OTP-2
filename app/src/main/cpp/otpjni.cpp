@@ -1,5 +1,6 @@
 #include <string.h>
 #include <jni.h>
+#include <stdlib.h>
 #include "otp.h"
 
 #define LOGD(...) \
@@ -7,7 +8,7 @@
 
 
 extern "C" JNIEXPORT jbyteArray JNICALL
-Java_com_datablink_OtpLibrary_generateOtp(JNIEnv *env, jobject thiz, jstring key) {
+Java_com_datablink_diogenes_otp_MainActivity_generateOtp(JNIEnv *env, jobject thiz, jstring key) {
 
     const char *constKeyLocal = env->GetStringUTFChars(key, 0);
     char* keyLocal = (char*)constKeyLocal;
