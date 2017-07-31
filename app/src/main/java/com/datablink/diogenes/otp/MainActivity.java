@@ -30,6 +30,26 @@ public class MainActivity extends AppCompatActivity {
         tokenLabelText = (TextView) findViewById(R.id.labelText);
 
 
+        // Try to load stored data
+        QRCodeData storedData = loadData();
+
+        if(storedData != null){
+
+            // Show data label
+            tokenLabelText.setText(storedData.label);
+
+            // Disable getKey Button
+            getKeyButton.setVisibility(View.INVISIBLE);
+
+            // Generate a new OTP with stored key and show it.
+            int otpNumber = getOTP(storedData.key);
+            otpNumberText.setText(Integer.toString(otpNumber));
+            updateOtpRealTime();
+
+
+        }
+
+
 
     }
 
