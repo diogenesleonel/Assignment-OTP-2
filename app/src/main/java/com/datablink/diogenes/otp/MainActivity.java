@@ -134,10 +134,14 @@ public class MainActivity extends AppCompatActivity {
 
     public int getOTP(String key){
 
-        // JNI function call
-        int otpNumber = 0;
+        // JNI function call (HMAC- SHA-1 hash)
+        byte[] hmac = generateOtp(key);
 
-        return otpNumber;
+
+        Log.d("hmca", byteArrayToHex(hmac));
+
+
+        return 0;
 
     }
 
@@ -178,12 +182,17 @@ public class MainActivity extends AppCompatActivity {
     static {
         System.loadLibrary("native-lib");
     }
-    public native String stringFromJNI();
+
+    public native byte[] generateOtp(String key);
 
 
-    // Example of a call to a native method
-    //TextView tv = (TextView) findViewById(R.id.sample_text);
-    //tv.setText(stringFromJNI());
+    public static String byteArrayToHex(byte[] a) {
+        StringBuilder sb = new StringBuilder(a.length * 2);
+        for(byte b: a)
+            sb.append(String.format("%02x", b));
+        return sb.toString();
+    }
+
 }
 
 
