@@ -1,6 +1,4 @@
 package com.datablink.diogenes.otp;
-
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -38,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private Runnable otpRunnable;
     private static final int UPDATE_INTERVAL_SECONDS = 30;
 
-    SharedPreferences sp;
+    private SharedPreferences sp;
     private static final String SP_KEY = "key";
     private static final String SP_LABEL = "label";
 
@@ -48,7 +46,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        sp = getSharedPreferences(getApplicationContext().getPackageName() + ".data", Context.MODE_PRIVATE);
+        sp = getSharedPreferences(getApplicationContext().getPackageName() + ".data",
+                Context.MODE_PRIVATE);
 
         getKeyButton = (Button) findViewById(R.id.getKeyButton);
         deleteDataButton = (Button) findViewById(R.id.deleteDataButton);
@@ -56,13 +55,12 @@ public class MainActivity extends AppCompatActivity {
         tokenLabelText = (TextView) findViewById(R.id.labelText);
 
 
-        // Try to load stored data
+        /* Try to load stored data */
         mData = loadData();
 
         if(mData != null){
 
-            // Disable getKey Button
-            getKeyButton.setVisibility(View.INVISIBLE);
+            getKeyButton.setVisibility(View.INVISIBLE); // Disable getKey Button
 
             updateLabels();
 
@@ -72,10 +70,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    // Get QR Code String:
+    /** Get QR Code String and process it. **/
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+
         if(result != null) {
             if(result.getContents() != null) {
 
@@ -116,8 +116,7 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d("Clicked", "getKeyClick");
 
-        // Read QRCodeData and save it
-        readQRCode();
+        readQRCode(); // Read QRCodeData and save it
 
     }
 
@@ -127,8 +126,7 @@ public class MainActivity extends AppCompatActivity {
 
         if(deleteData()){
 
-            // Success
-            Log.d("Success", "deleteData");
+            Log.d("Success", "deleteData"); // Success
 
             tokenLabelText.setText("");
             otpNumberText.setText("");
@@ -136,15 +134,11 @@ public class MainActivity extends AppCompatActivity {
 
         }else{
 
-            // Error
-            Log.d("Error", "deleteData");
-
+            Log.d("Error", "deleteData"); // Error
 
         }
 
     }
-
-
 
     //------------------------------------- Helpers ----------------------------------------------//
 
@@ -179,23 +173,22 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /** Generate 6 digits OTP **/
     public int getOTP(String key){
 
-        // JNI function call (HMAC- SHA-1 hash)
-        byte[] hmac = generateOtp(key);
+        byte[] hmac = generateOtp(key); // JNI function call (HMAC- SHA-1 hash)
 
-        // 4 bytes starting at offset 10
-        byte[] slice = Arrays.copyOfRange(hmac, OFFSET - 1, OFFSET + N_BYTE - 1);
 
-        // Top bit clear
-        slice[0] &= ~(1 << 7);
+        byte[] slice = Arrays.copyOfRange(hmac // 4 bytes starting at offset 10
+                , OFFSET - 1, OFFSET + N_BYTE - 1);
 
-        // Put bytes into a buffer and convert them to decimal (integer)
+        slice[0] &= ~(1 << 7); // Top bit clear
+
+        /* Put bytes into a buffer and convert them to decimal (integer) */
         ByteBuffer buffer = ByteBuffer.wrap(slice);
         int decimal = buffer.getInt();
 
-        // Last 6 digits
-        int lastDigits = decimal % 1000000;
+        int lastDigits = decimal % 1000000; // Last 6 digits
 
         Log.d("OTP", "DBC1 (HMAC): " + byteArrayToHex(hmac));
         Log.d("OTP", "DBC2 (4 bytes + top bit clear): " +  byteArrayToHex(slice)  );
@@ -206,6 +199,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /** Setup ZXing and initialize camera. **/
     public void readQRCode(){
 
         IntentIntegrator integrator = new IntentIntegrator(this);
@@ -220,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
+    /** Update token label and start a timer to update otp number label in a fixed time interval **/
     public void updateLabels(){
 
         // Show label
@@ -248,19 +242,19 @@ public class MainActivity extends AppCompatActivity {
 
 
     //--------------------------------------- JNI ------------------------------------------------//
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
 
-    // Used to load the 'native-lib' library on application startup.
+    /** Used to load the 'native-lib' library on application startup. **/
     static {
         System.loadLibrary("native-lib");
     }
 
+    /**
+     * A native method that is implemented by the 'native-lib' native library,
+     * which is packaged with this application.
+     */
     public native byte[] generateOtp(String key);
 
-
+    /* Convert byte Array to hexadecimal */
     public static String byteArrayToHex(byte[] a) {
         StringBuilder sb = new StringBuilder(a.length * 2);
         for(byte b: a)
@@ -271,6 +265,7 @@ public class MainActivity extends AppCompatActivity {
 }
 
 
+/** QR Code class to manage read data. **/
 class QRCodeData {
 
     private String key = "";
@@ -289,9 +284,7 @@ class QRCodeData {
 
     public QRCodeData(String content){
 
-        // Process String and return QRCodeData object
-
-
+        /** Process String and return QRCodeData object **/
         try {
 
             JSONObject json = new JSONObject(content);
@@ -315,6 +308,7 @@ class QRCodeData {
 
     }
 
+    /** Validate data **/
     private void checkData(){
 
         if(key.isEmpty() || label.isEmpty() ||
