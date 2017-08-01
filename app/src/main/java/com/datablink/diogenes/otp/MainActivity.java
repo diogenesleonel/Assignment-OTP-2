@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -67,9 +68,18 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("QR Code Scanned", result.getContents());
 
                 mData = new QRCodeData(result.getContents());
-                saveData(mData);
 
-                updateLabels();
+                if(mData.isDataValid()) {
+
+                    getKeyButton.setVisibility(View.INVISIBLE);
+                    saveData(mData);
+                    updateLabels();
+
+                }else {
+
+                    Toast.makeText(this, "Could not get a valid information. Please, try again.",
+                            Toast.LENGTH_LONG).show();
+                }
 
             } else {
 
@@ -217,12 +227,15 @@ public class MainActivity extends AppCompatActivity {
 
 class QRCodeData {
 
-    private String key;
-    private String label;
+    private String key = "";
+    private String label = "";
+
+    private boolean isValidData;
 
     public QRCodeData(String content){
 
         // Process String and return QRCodeData object
+
 
         try {
 
@@ -234,12 +247,34 @@ class QRCodeData {
             Log.d("key", key);
             Log.d("label", label);
 
+            checkData();
+
+
 
         } catch (JSONException e) {
 
             e.printStackTrace();
+            isValidData = false;
 
         }
+
+    }
+
+    private void checkData(){
+
+        if(key.isEmpty() || label.isEmpty() ||
+        key.length() < 32 || key.length() > 32){
+            isValidData = false;
+
+        }else{
+            isValidData = true;
+        }
+
+    }
+
+    public boolean isDataValid(){
+
+        return isValidData;
 
     }
 
