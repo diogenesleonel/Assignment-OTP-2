@@ -2,6 +2,7 @@ package com.datablink.diogenes.otp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -27,9 +28,13 @@ public class MainActivity extends AppCompatActivity {
     TextView tokenLabelText;
 
     private QRCodeData mData;
-
     private static final int OFFSET = 10;
     private static final int N_BYTE = 4;
+
+    private Handler timerHandler = new Handler();
+    private Runnable otpRunnable;
+    private static final int UPDATE_INTERVAL_SECONDS = 30;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -193,9 +198,22 @@ public class MainActivity extends AppCompatActivity {
         // Show label
         tokenLabelText.setText(mData.getLabel());
 
-        // Generate OTP and show it
-        int otpNumber = getOTP(mData.getKey());
-        otpNumberText.setText(Integer.toString(otpNumber));
+
+        // Update OTP number every X seconds
+        otpRunnable = new Runnable() {
+            @Override
+            public void run() {
+
+                // Generate OTP and show it
+                int otpNumber = getOTP(mData.getKey());
+                otpNumberText.setText(Integer.toString(otpNumber));
+
+                timerHandler.postDelayed(this, UPDATE_INTERVAL_SECONDS * 1000);
+            }
+        };
+
+        otpRunnable.run();
+
 
     }
 

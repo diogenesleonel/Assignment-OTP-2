@@ -42,24 +42,26 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:text="OTP"
+        android:textSize="20sp"
         app:layout_constraintBaseline_creator="1"
         app:layout_constraintBaseline_toBaselineOf="@+id/otpNumberText"
         app:layout_constraintLeft_creator="1"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginStart="16dp" />
+        app:layout_constraintLeft_toLeftOf="parent" />
 
     <TextView
         android:id="@+id/textView4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:text="Token Label"
+        android:textSize="20sp"
         app:layout_constraintBaseline_creator="1"
         app:layout_constraintBaseline_toBaselineOf="@+id/labelText"
         app:layout_constraintLeft_creator="1"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginStart="16dp" />
+        app:layout_constraintLeft_toLeftOf="parent" />
 
     <TextView
         android:id="@+id/otpNumberText"
@@ -70,6 +72,8 @@
         android:layout_marginRight="8dp"
         android:layout_marginStart="86dp"
         android:layout_marginTop="39dp"
+        android:textSize="20sp"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_creator="1"
         app:layout_constraintLeft_toRightOf="@+id/textView3"
         app:layout_constraintRight_creator="1"
@@ -83,15 +87,16 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginLeft="37dp"
-        android:layout_marginRight="8dp"
         android:layout_marginStart="37dp"
         android:layout_marginTop="13dp"
-        app:layout_constraintHorizontal_bias="1.0"
+        android:textSize="20sp"
         app:layout_constraintLeft_creator="1"
         app:layout_constraintLeft_toRightOf="@+id/textView4"
         app:layout_constraintRight_creator="1"
-        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_creator="1"
-        app:layout_constraintTop_toBottomOf="@+id/otpNumberText" />
+        app:layout_constraintTop_toBottomOf="@+id/otpNumberText"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.0" />
 
 </android.support.constraint.ConstraintLayout>
