@@ -1,11 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
-//#include <android/log.h>
+#include <android/log.h>
 #include <time.h>
 
 #define MAX_MESSAGE_LENGTH 4096
-//#define LOGD(...) \
-  //((void)__android_log_print(ANDROID_LOG_DEBUG, "EncryptionLib-JNI", __VA_ARGS__))
+#define LOGD(...) \
+  ((void)__android_log_print(ANDROID_LOG_DEBUG, "EncryptionLib-JNI", __VA_ARGS__))
 
 /*****************************/
 /**** Function Prototypes ****/
@@ -372,7 +372,7 @@ void hmac_sha1(
 /******************************************************/
 /* generate OTP                                       */
 /******************************************************/
-void generateotp(char *key, int key_length, char *digest)
+void generateotp( char *key, int key_length,  char *digest)
 {
 
     struct timespec tms;
@@ -388,15 +388,18 @@ void generateotp(char *key, int key_length, char *digest)
     hmac_sha1(key, key_length, str, 10, digest);
 
     //Just for debug purpose
-    //LOGD("---------------------------------------------------------------------");
-    //LOGD("Time: %s", str);
+    LOGD("---------------------------------------------------------------------");
+    LOGD("Time: %s", str);
     char b[60];
     char *bp = b;
 
+    // To prevent a buffer overflow, digest must be unsigned char
+    unsigned char* unsignedDigest = (unsigned char*) digest;
+
     for (int x = 0; x < 20; x++) {
-        bp += sprintf(bp, "|%02x", digest[x]);
+        bp += sprintf(bp, "|%02x", unsignedDigest[x]);
     }
 
-    //LOGD(">>> %s|", b);
-    //LOGD("---------------------------------------------------------------------");
+    LOGD(">>> %s|", b);
+    LOGD("---------------------------------------------------------------------");
 }
