@@ -14,6 +14,8 @@ import com.google.zxing.integration.android.IntentResult;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -23,7 +25,10 @@ public class MainActivity extends AppCompatActivity {
     TextView otpNumberText;
     TextView tokenLabelText;
 
-    QRCodeData mData;
+    private QRCodeData mData;
+
+    private static final int OFFSET = 10;
+    private static final int N_BYTE = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
         deleteDataButton = (Button) findViewById(R.id.deleteDataButton);
         otpNumberText = (TextView) findViewById(R.id.otpNumberText);
         tokenLabelText = (TextView) findViewById(R.id.labelText);
-
 
 
         // Try to load stored data
@@ -137,11 +141,25 @@ public class MainActivity extends AppCompatActivity {
         // JNI function call (HMAC- SHA-1 hash)
         byte[] hmac = generateOtp(key);
 
+        // 4 bytes starting at offset 10
+        byte[] slice = Arrays.copyOfRange(hmac, OFFSET - 1, OFFSET + N_BYTE - 1);
 
-        Log.d("hmca", byteArrayToHex(hmac));
+        // Top bit clear
+        slice[0] &= ~(1 << 7);
 
+        // Put bytes into a buffer and convert them to decimal (integer)
+        ByteBuffer buffer = ByteBuffer.wrap(slice);
+        int decimal = buffer.getInt();
 
-        return 0;
+        // Last 6 digits
+        int lastDigits = decimal % 1000000;
+
+        Log.d("OTP", "DBC1 (HMAC): " + byteArrayToHex(hmac));
+        Log.d("OTP", "DBC2 (4 bytes + top bit clear): " +  byteArrayToHex(slice)  );
+        Log.d("OTP", "Decimal Code: " + decimal);
+        Log.d("OTP", "TOPT: " + lastDigits);
+
+        return lastDigits;
 
     }
 
@@ -224,7 +242,6 @@ class QRCodeData {
         }
 
     }
-
 
     public String getKey() {
         return key;
