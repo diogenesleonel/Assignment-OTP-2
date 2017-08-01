@@ -1,6 +1,9 @@
 package com.datablink.diogenes.otp;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -35,11 +38,17 @@ public class MainActivity extends AppCompatActivity {
     private Runnable otpRunnable;
     private static final int UPDATE_INTERVAL_SECONDS = 30;
 
+    SharedPreferences sp;
+    private static final String SP_KEY = "key";
+    private static final String SP_LABEL = "label";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        sp = getSharedPreferences(getApplicationContext().getPackageName() + ".data", Context.MODE_PRIVATE);
 
         getKeyButton = (Button) findViewById(R.id.getKeyButton);
         deleteDataButton = (Button) findViewById(R.id.deleteDataButton);
@@ -48,9 +57,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         // Try to load stored data
-        QRCodeData storedData = loadData();
+        mData = loadData();
 
-        if(storedData != null){
+        if(mData != null){
 
             // Disable getKey Button
             getKeyButton.setVisibility(View.INVISIBLE);
@@ -77,7 +86,11 @@ public class MainActivity extends AppCompatActivity {
                 if(mData.isDataValid()) {
 
                     getKeyButton.setVisibility(View.INVISIBLE);
-                    saveData(mData);
+
+                    if(!saveData(mData))
+                        Toast.makeText(this, "Could not save data.", Toast.LENGTH_LONG).show();
+
+
                     updateLabels();
 
                 }else {
@@ -117,6 +130,8 @@ public class MainActivity extends AppCompatActivity {
             // Success
             Log.d("Success", "deleteData");
 
+            tokenLabelText.setText("");
+            otpNumberText.setText("");
             getKeyButton.setVisibility(View.VISIBLE);
 
         }else{
@@ -135,19 +150,32 @@ public class MainActivity extends AppCompatActivity {
 
     public Boolean deleteData(){
 
-        return true;
+        SharedPreferences.Editor editor = sp.edit();
+        editor.clear();
+
+        return editor.commit();
 
     }
 
     public QRCodeData loadData(){
 
-        return null;
+        QRCodeData loadData = new QRCodeData(sp.getString(SP_KEY,""), sp.getString(SP_LABEL,""));
+
+        if(loadData.isDataValid())
+            return loadData;
+        else
+            return null ;
 
     }
 
     public Boolean saveData(QRCodeData toSave){
 
-        return true;
+        SharedPreferences.Editor editor = sp.edit();
+
+        editor.putString(SP_KEY, toSave.getKey());
+        editor.putString(SP_LABEL, toSave.getLabel());
+
+        return editor.commit();
 
     }
 
@@ -249,6 +277,15 @@ class QRCodeData {
     private String label = "";
 
     private boolean isValidData;
+
+    public QRCodeData(String key, String label) {
+
+        this.key = key;
+        this.label = label;
+
+        checkData();
+
+    }
 
     public QRCodeData(String content){
 
