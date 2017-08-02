@@ -4,12 +4,19 @@
 #include <time.h>
 
 #define MAX_MESSAGE_LENGTH 4096
+#define OFFSET_START 9
+#define N_BYTE 4
+#define OFFSET_END (OFFSET_START + N_BYTE)
+
 #define LOGD(...) \
   ((void)__android_log_print(ANDROID_LOG_DEBUG, "EncryptionLib-JNI", __VA_ARGS__))
+
 
 /*****************************/
 /**** Function Prototypes ****/
 /*****************************/
+
+void printByte(char* bytes, int size);
 
 unsigned long int ft(
         int t,
@@ -402,4 +409,81 @@ void generateotp( char *key, int key_length,  char *digest)
 
     LOGD(">>> %s|", b);
     LOGD("---------------------------------------------------------------------");
+}
+
+int generateOtpDigits(char *key, int key_length)
+{
+
+    struct timespec tms;
+
+    clock_gettime(CLOCK_REALTIME,&tms);
+    int t = tms.tv_sec/30;
+
+    char str[10];
+
+    sprintf(str, "%d", t);
+
+    char* digest= (char*)malloc(20);
+    memset(digest, 0, 20);
+
+    hmac_sha1(key, key_length, str, 10, digest);
+
+    //Just for debug purpose
+    LOGD("---------------------------------------------------------------------");
+    LOGD("Time: %s", str);
+
+    printByte(digest,20);
+
+    // Copy 4 bytes starting at offset 10
+    char* slice= (char*)malloc(4);
+    memset(digest, 0, 4);
+
+    int j = 0;
+    for (int i = OFFSET_START ; i < OFFSET_END; i++) {
+
+        slice[j] = digest[i];
+        j++;
+
+    }
+
+    printByte(slice, 4);
+
+    // top bit clear
+    slice[0] &= ~(1 << 7);
+
+    printByte(slice,4);
+
+    // Convert to integer (32 bits)
+     int digits = (unsigned char)(slice[0]) << 24 |
+            (unsigned char)(slice[1]) << 16 |
+            (unsigned char)(slice[2]) << 8 |
+            (unsigned char)(slice[3]);
+
+    LOGD(">>> %d", digits);
+    LOGD("---------------------------------------------------------------------");
+
+    // Get last 6 digits
+    digits = digits % 1000000;
+
+    free(digest);
+    free(slice);
+
+    return digits;
+}
+
+void printByte(char* bytes, int size){
+
+    char *b = (char*)malloc(size*3);
+    char *bp = b;
+
+    // To prevent a buffer overflow, digest must be unsigned char
+    unsigned char* unsignedDigest = (unsigned char*) bytes;
+
+    for (int x = 0; x < size; x++) {
+        bp += sprintf(bp, "|%02x", unsignedDigest[x]);
+   }
+    LOGD(">>> %s|", b);
+    LOGD("---------------------------------------------------------------------");
+
+
 }

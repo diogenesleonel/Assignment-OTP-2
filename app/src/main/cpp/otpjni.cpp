@@ -7,6 +7,8 @@
   ((void)__android_log_print(ANDROID_LOG_DEBUG, "EncryptionLib-JNI", __VA_ARGS__))
 
 
+
+
 extern "C" JNIEXPORT jbyteArray JNICALL
 Java_com_datablink_diogenes_otp_MainActivity_generateOtp(JNIEnv *env, jobject thiz, jstring key) {
 
@@ -34,3 +36,22 @@ Java_com_datablink_diogenes_otp_MainActivity_generateOtp(JNIEnv *env, jobject th
 
     return digestByteArray;
 }
+
+
+extern "C" JNIEXPORT  jint JNICALL
+Java_com_datablink_diogenes_otp_MainActivity_generateOtpDigits(JNIEnv *env, jobject instance,
+                                                               jstring key_) {
+
+    const char *constKeyLocal = env->GetStringUTFChars(key_, 0);
+    char* keyLocal = (char*)constKeyLocal;
+
+    int keysize = 32;
+
+    int digits = generateOtpDigits(keyLocal,keysize);
+
+    free(keyLocal);
+
+    return digits;
+
+}
+

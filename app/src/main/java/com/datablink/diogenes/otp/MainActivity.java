@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    /** Get QR Code String and process it. **/
+    /** Get QR Code String and process it. */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
@@ -173,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    /** Generate 6 digits OTP **/
+    /** Generate 6 digits OTP */
     public int getOTP(String key){
 
         byte[] hmac = generateOtp(key); // JNI function call (HMAC- SHA-1 hash)
@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
 
         slice[0] &= ~(1 << 7); // Top bit clear
 
-        /* Put bytes into a buffer and convert them to decimal (integer) */
+        // Put bytes into a buffer and convert them to decimal (integer)
         ByteBuffer buffer = ByteBuffer.wrap(slice);
         int decimal = buffer.getInt();
 
@@ -195,26 +195,31 @@ public class MainActivity extends AppCompatActivity {
         Log.d("OTP", "Decimal Code: " + decimal);
         Log.d("OTP", "TOPT: " + lastDigits);
 
+
         return lastDigits;
 
     }
 
-    /** Setup ZXing and initialize camera. **/
+
+    /** Setup ZXing and initialize camera. */
     public void readQRCode(){
 
         IntentIntegrator integrator = new IntentIntegrator(this);
         integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
         integrator.setCaptureActivity(CaptureActivityPortrait.class);
         integrator.setPrompt("Scan QR Code");
-        integrator.setCameraId(1);
-        integrator.setOrientationLocked(true);
+        integrator.setCameraId(0);
+        integrator.setOrientationLocked(false);
         integrator.setBeepEnabled(true);
         integrator.setBarcodeImageEnabled(true);
         integrator.initiateScan();
 
     }
 
-    /** Update token label and start a timer to update otp number label in a fixed time interval **/
+    /**
+     *  Update token label and start a timer to
+     *  update otp number label in a fixed time interval
+     */
     public void updateLabels(){
 
         // Show label
@@ -227,7 +232,9 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
 
                 // Generate OTP and show it
-                int otpNumber = getOTP(mData.getKey());
+                //int otpNumber = getOTP(mData.getKey());
+
+                int otpNumber = generateOtpDigits(mData.getKey());
                 otpNumberText.setText(Integer.toString(otpNumber));
 
                 timerHandler.postDelayed(this, UPDATE_INTERVAL_SECONDS * 1000);
@@ -248,13 +255,11 @@ public class MainActivity extends AppCompatActivity {
         System.loadLibrary("native-lib");
     }
 
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
+    /** Native methods that is implemented by the 'native-lib' */
     public native byte[] generateOtp(String key);
+    public native int generateOtpDigits(String key);
 
-    /* Convert byte Array to hexadecimal */
+    /** Convert byte Array to hexadecimal */
     public static String byteArrayToHex(byte[] a) {
         StringBuilder sb = new StringBuilder(a.length * 2);
         for(byte b: a)
@@ -264,6 +269,8 @@ public class MainActivity extends AppCompatActivity {
 
 }
 
+
+    //--------------------------------------- QR Code Class---------------------------------------//
 
 /** QR Code class to manage read data. **/
 class QRCodeData {
@@ -284,7 +291,7 @@ class QRCodeData {
 
     public QRCodeData(String content){
 
-        /** Process String and return QRCodeData object **/
+        //  Process String and return QRCodeData object
         try {
 
             JSONObject json = new JSONObject(content);
@@ -308,7 +315,7 @@ class QRCodeData {
 
     }
 
-    /** Validate data **/
+    /** Validate data */
     private void checkData(){
 
         if(key.isEmpty() || label.isEmpty() ||
