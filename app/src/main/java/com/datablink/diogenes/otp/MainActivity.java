@@ -17,9 +17,6 @@ import com.google.zxing.integration.android.IntentResult;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,10 +26,8 @@ public class MainActivity extends AppCompatActivity {
     TextView tokenLabelText;
 
     private QRCodeData mData;
-    private static final int OFFSET = 10;
-    private static final int N_BYTE = 4;
 
-    private Handler timerHandler = new Handler();
+    private Handler timerHandler;
     private Runnable otpRunnable;
     private static final int UPDATE_INTERVAL_SECONDS = 30;
 
@@ -46,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Log.d("LifeCycle", "OnCreate");
+
         sp = getSharedPreferences(getApplicationContext().getPackageName() + ".data",
                 Context.MODE_PRIVATE);
 
@@ -55,6 +52,10 @@ public class MainActivity extends AppCompatActivity {
         tokenLabelText = (TextView) findViewById(R.id.labelText);
 
 
+
+    }
+
+    public void loadStoredData(){
         /* Try to load stored data */
         mData = loadData();
 
@@ -65,9 +66,27 @@ public class MainActivity extends AppCompatActivity {
             updateLabels();
 
         }
+    }
 
+    @Override
+    protected void onPause() {
 
+        Log.d("LifeCycle", "Pause");
 
+        if(timerHandler != null)
+            timerHandler.removeCallbacksAndMessages(null);// Stop timer
+
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+
+        Log.d("LifeCycle", "Resume");
+
+        loadStoredData();
+
+        super.onResume();
     }
 
     /** Get QR Code String and process it. */
@@ -199,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
         // Show label
         tokenLabelText.setText(mData.getLabel());
 
+        timerHandler =  new Handler();
 
         // Update OTP number every X seconds
         otpRunnable = new Runnable() {
@@ -207,7 +227,8 @@ public class MainActivity extends AppCompatActivity {
 
                 // Generate OTP and show it
                 int otpNumber = generateOtpDigits(mData.getKey());
-                otpNumberText.setText(Integer.toString(otpNumber));
+
+                otpNumberText.setText(String.format("%06d", otpNumber));
 
                 timerHandler.postDelayed(this, UPDATE_INTERVAL_SECONDS * 1000);
             }

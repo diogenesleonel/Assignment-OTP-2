@@ -459,7 +459,7 @@ int generateOtpDigits(char *key, int key_length)
             (unsigned char)(slice[2]) << 8 |
             (unsigned char)(slice[3]);
 
-    LOGD(">>> %d", digits);
+    LOGD(">>> Decimal Code %d", digits);
     LOGD("---------------------------------------------------------------------");
 
     // Get last 6 digits
