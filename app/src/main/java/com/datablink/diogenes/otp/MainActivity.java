@@ -173,32 +173,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    /** Generate 6 digits OTP */
-    public int getOTP(String key){
-
-        byte[] hmac = generateOtp(key); // JNI function call (HMAC- SHA-1 hash)
-
-
-        byte[] slice = Arrays.copyOfRange(hmac // 4 bytes starting at offset 10
-                , OFFSET - 1, OFFSET + N_BYTE - 1);
-
-        slice[0] &= ~(1 << 7); // Top bit clear
-
-        // Put bytes into a buffer and convert them to decimal (integer)
-        ByteBuffer buffer = ByteBuffer.wrap(slice);
-        int decimal = buffer.getInt();
-
-        int lastDigits = decimal % 1000000; // Last 6 digits
-
-        Log.d("OTP", "DBC1 (HMAC): " + byteArrayToHex(hmac));
-        Log.d("OTP", "DBC2 (4 bytes + top bit clear): " +  byteArrayToHex(slice)  );
-        Log.d("OTP", "Decimal Code: " + decimal);
-        Log.d("OTP", "TOPT: " + lastDigits);
-
-
-        return lastDigits;
-
-    }
 
 
     /** Setup ZXing and initialize camera. */
@@ -232,8 +206,6 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
 
                 // Generate OTP and show it
-                //int otpNumber = getOTP(mData.getKey());
-
                 int otpNumber = generateOtpDigits(mData.getKey());
                 otpNumberText.setText(Integer.toString(otpNumber));
 
