@@ -217,6 +217,77 @@ public class DataEncryption {
     }
 
 
+    // Lower than M and higher than KITKAT
+    public String decryptString(byte[] cipherText){
+
+        try {
+            // Get public and private key
+            KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry) mKeystore.getEntry(mAlias, null);
+            RSAPrivateKey privateKey = (RSAPrivateKey) privateKeyEntry.getPrivateKey();
+
+            Cipher output = Cipher.getInstance(TRANSFORMATION_ASYMMETRIC, "AndroidOpenSSL");
+            output.init(Cipher.DECRYPT_MODE, privateKey);
+
+
+            // Generate decrypted data using keys
+            CipherInputStream cipherInputStream = new CipherInputStream(
+                    new ByteArrayInputStream(cipherText), output);
+
+            ArrayList<Byte> values = new ArrayList<>();
+            int nextByte;
+            while ((nextByte = cipherInputStream.read()) != -1) {
+                values.add((byte) nextByte);
+            }
+
+            byte[] bytes = new byte[values.size()];
+            for (int i = 0; i < bytes.length; i++) {
+                bytes[i] = values.get(i).byteValue();
+            }
+
+            return new String(bytes, 0, bytes.length, "UTF-8");
+
+        }catch (NoSuchPaddingException |
+                NoSuchAlgorithmException| NoSuchProviderException| InvalidKeyException|
+                IOException| UnrecoverableEntryException| KeyStoreException e){
+            e.printStackTrace();
+
+        }
+
+        return "";
+    }
+
+    // Higher than Marshmallow
+    public String decryptString(byte[] cipherText, byte[] iv) {
+
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
+            return "";
+
+        try {
+            // Get secretKey from keystore
+            final KeyStore.SecretKeyEntry secretKeyEntry = (KeyStore.SecretKeyEntry) mKeystore
+                    .getEntry(mAlias, null);
+            final SecretKey secretKey = secretKeyEntry.getSecretKey();
+
+            // Get cipher and specify Authentication tag length
+            final Cipher cipher = Cipher.getInstance(TRANSFORMATION_SYMMETRIC);
+            final GCMParameterSpec spec;
+            spec = new GCMParameterSpec(128, iv);
+
+            // Initialize decryption process
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, spec);
+
+            return new String(cipher.doFinal(cipherText), "UTF-8");
+        }catch (UnrecoverableEntryException|
+                NoSuchAlgorithmException|KeyStoreException| NoSuchPaddingException |
+                InvalidAlgorithmParameterException| InvalidKeyException| BadPaddingException|
+                IllegalBlockSizeException| UnsupportedEncodingException e ){
+
+            e.printStackTrace();
+        }
+
+        return "";
+    }
 
 
     public byte[] getmIv() {
