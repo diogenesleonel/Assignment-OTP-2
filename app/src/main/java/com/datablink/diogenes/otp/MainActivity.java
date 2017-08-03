@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +17,7 @@ import com.google.zxing.integration.android.IntentResult;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
 
 
 public class MainActivity extends AppCompatActivity {
@@ -33,8 +35,12 @@ public class MainActivity extends AppCompatActivity {
 
     private SharedPreferences sp;
     private static final String SP_KEY = "key";
+    private static final String SP_KEY_IV = "key_IV";
     private static final String SP_LABEL = "label";
+    private static final String SP_LABEL_IV = "label_IV";
 
+    private DataEncryption mDataEncryption;
+    private static final String KEYSTORE_ALIAS = "pros";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d("LifeCycle", "OnCreate");
 
+
+        // References
         sp = getSharedPreferences(getApplicationContext().getPackageName() + ".data",
                 Context.MODE_PRIVATE);
 
@@ -50,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
         deleteDataButton = (Button) findViewById(R.id.deleteDataButton);
         otpNumberText = (TextView) findViewById(R.id.otpNumberText);
         tokenLabelText = (TextView) findViewById(R.id.labelText);
-
 
 
     }
@@ -83,6 +90,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
 
         Log.d("LifeCycle", "Resume");
+
+        mDataEncryption = new DataEncryption(this, KEYSTORE_ALIAS);
+        mDataEncryption.createNewKeys();
 
         loadStoredData();
 
@@ -166,13 +176,50 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = sp.edit();
         editor.clear();
 
+        mDataEncryption.deleteKey(); // Delete keys to avoid error when restart app
+        mDataEncryption.createNewKeys(); // Restart keys
+
         return editor.commit();
 
     }
 
     public QRCodeData loadData(){
 
-        QRCodeData loadData = new QRCodeData(sp.getString(SP_KEY,""), sp.getString(SP_LABEL,""));
+        Log.d("D", "Loading data");
+
+        String key, label;
+        String spLabel = sp.getString(SP_LABEL,"") ;
+        String spLabelIv = sp.getString(SP_LABEL_IV,"");
+
+        String spKey = sp.getString(SP_KEY,"");
+        String spKeyIv = sp.getString(SP_KEY_IV,"");
+
+        byte[] keyCipher, keyIv, labelCipher, labelIv;
+
+
+        if (spLabel.isEmpty() || spKey.isEmpty())
+            return  null;
+
+        // Transform text encoded into byte[]
+        keyCipher = Base64.decode(spKey, Base64.DEFAULT);
+        labelCipher = Base64.decode(spLabel, Base64.DEFAULT);
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M){
+            keyIv = Base64.decode(spKeyIv, Base64.DEFAULT);
+            labelIv = Base64.decode(spLabelIv, Base64.DEFAULT);
+            key = mDataEncryption.decryptString(keyCipher, keyIv);
+            label = mDataEncryption.decryptString(labelCipher, labelIv);
+        } else {
+            key = mDataEncryption.decryptString(keyCipher);
+            label = mDataEncryption.decryptString(labelCipher);
+        }
+
+
+        Log.d("Decryption [label]", label);
+        Log.d("Decryption [key]", key);
+
+
+        QRCodeData loadData = new QRCodeData(key, label);
 
         if(loadData.isDataValid())
             return loadData;
@@ -183,10 +230,23 @@ public class MainActivity extends AppCompatActivity {
 
     public Boolean saveData(QRCodeData toSave){
 
+        Log.d("D", "Saving data");
+
         SharedPreferences.Editor editor = sp.edit();
 
-        editor.putString(SP_KEY, toSave.getKey());
-        editor.putString(SP_LABEL, toSave.getLabel());
+        // Encrypts key
+        byte[] keyCipher = mDataEncryption.encryptString(toSave.getKey());
+        editor.putString(SP_KEY, Base64.encodeToString(keyCipher, Base64.DEFAULT ));
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
+            editor.putString(SP_KEY_IV, Base64.encodeToString(mDataEncryption.getmIv(), Base64.DEFAULT ));
+
+        // Encrypts label
+        byte[] labelCipher = mDataEncryption.encryptString(toSave.getLabel());
+        editor.putString(SP_LABEL, Base64.encodeToString(labelCipher, Base64.DEFAULT ));
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
+            editor.putString(SP_LABEL_IV, Base64.encodeToString(mDataEncryption.getmIv(), Base64.DEFAULT ));
 
         return editor.commit();
 
