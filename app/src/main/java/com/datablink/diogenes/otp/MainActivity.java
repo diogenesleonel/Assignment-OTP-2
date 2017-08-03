@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String SP_LABEL_IV = "label_IV";
 
     private DataEncryption mDataEncryption;
-    private static final String KEYSTORE_ALIAS = "pros";
+    private String keystoreAlias ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d("LifeCycle", "OnCreate");
 
+        keystoreAlias = getApplicationContext().getPackageName();
 
         // References
         sp = getSharedPreferences(getApplicationContext().getPackageName() + ".data",
@@ -91,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d("LifeCycle", "Resume");
 
-        mDataEncryption = new DataEncryption(this, KEYSTORE_ALIAS);
+        mDataEncryption = new DataEncryption(this, keystoreAlias);
         mDataEncryption.createNewKeys();
 
         loadStoredData();

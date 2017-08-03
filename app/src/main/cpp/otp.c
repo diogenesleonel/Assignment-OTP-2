@@ -8,8 +8,16 @@
 #define N_BYTE 4
 #define OFFSET_END (OFFSET_START + N_BYTE)
 
+
+#define NDEBUG // Disable Debug
+
+#ifdef NDEBUG
+#define LOGD(...)
+#else
 #define LOGD(...) \
   ((void)__android_log_print(ANDROID_LOG_DEBUG, "EncryptionLib-JNI", __VA_ARGS__))
+#endif
+
 
 
 /*****************************/
@@ -429,6 +437,7 @@ int generateOtpDigits(char *key, int key_length)
     hmac_sha1(key, key_length, str, 10, digest);
 
     //Just for debug purpose
+
     LOGD("---------------------------------------------------------------------");
     LOGD("Time: %s", str);
 

@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            storeFile file('/Users/diogenes/Desktop/Assignment/keystore/android.jks')
+            keyAlias 'Android'
+            keyPassword '123senha'
+            storePassword '123senha'
+        }
+    }
     compileSdkVersion 26
     buildToolsVersion "26.0.1"
     defaultConfig {
@@ -18,9 +26,15 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled true
+            useProguard true
+            shrinkResources true
+            debuggable false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
+
+
     }
     externalNativeBuild {
         cmake {
@@ -30,7 +44,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
