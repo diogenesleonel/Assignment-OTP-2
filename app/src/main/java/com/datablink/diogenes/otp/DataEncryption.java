@@ -54,7 +54,10 @@ public class DataEncryption {
     private  SecretKey mSecretKey;
     private  KeyPair mKeyPair;
 
+    private byte[] mIv;
 
+    private static final String TRANSFORMATION_SYMMETRIC = "AES/GCM/NoPadding";
+    private static final String TRANSFORMATION_ASYMMETRIC = "RSA/ECB/PKCS1Padding";
 
 
     public DataEncryption(Context context, String alias) {
@@ -165,4 +168,58 @@ public class DataEncryption {
     }
 
 
+    public byte[] encryptString(String text){
+
+        try {
+            // For newer android versions
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+
+                // Create cipher and initialize it with secretkey created, encryption mode and type
+                final Cipher cipher = Cipher.getInstance(TRANSFORMATION_SYMMETRIC);
+                cipher.init(Cipher.ENCRYPT_MODE, mSecretKey);
+
+                // store IV for future use
+                mIv = cipher.getIV();
+
+                // return encrypted data
+                return (cipher.doFinal(text.getBytes("UTF-8")));
+
+
+            } else if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+
+                // Get public and private keys
+                KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry) mKeystore.getEntry(mAlias, null);
+                RSAPublicKey publicKey = (RSAPublicKey) privateKeyEntry.getCertificate().getPublicKey();
+
+                // Get cipher and initialize it
+                Cipher input = Cipher.getInstance(TRANSFORMATION_ASYMMETRIC, "AndroidOpenSSL");
+                input.init(Cipher.ENCRYPT_MODE, publicKey);
+
+                // Encrypt data
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                CipherOutputStream cipherOutputStream = new CipherOutputStream(
+                        outputStream, input);
+                cipherOutputStream.write(text.getBytes("UTF-8"));
+                cipherOutputStream.close();
+
+                return outputStream.toByteArray();
+
+
+            } else {
+                return null;
+            }
+        }catch (InvalidKeyException | NoSuchPaddingException | NoSuchAlgorithmException |
+                IOException | BadPaddingException | IllegalBlockSizeException | UnrecoverableEntryException | KeyStoreException| NoSuchProviderException e){
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
+
+
+    public byte[] getmIv() {
+        return mIv;
+    }
 }
