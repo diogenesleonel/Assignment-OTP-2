@@ -7,8 +7,6 @@
   ((void)__android_log_print(ANDROID_LOG_DEBUG, "EncryptionLib-JNI", __VA_ARGS__))
 
 
-
-
 extern "C" JNIEXPORT jbyteArray JNICALL
 Java_com_datablink_diogenes_otp_MainActivity_generateOtp(JNIEnv *env, jobject thiz, jstring key) {
 

@@ -9,7 +9,7 @@
 #define OFFSET_END (OFFSET_START + N_BYTE)
 
 
-#define NDEBUG // Disable Debug
+//#define NDEBUG // Disable Debug
 
 #ifdef NDEBUG
 #define LOGD(...)
