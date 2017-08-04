@@ -206,10 +206,15 @@ public class MainActivity extends AppCompatActivity {
         labelCipher = Base64.decode(spLabel, Base64.DEFAULT);
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M){
+
+            if(spKeyIv.isEmpty() || spLabelIv.isEmpty())
+                return null;
+
             keyIv = Base64.decode(spKeyIv, Base64.DEFAULT);
             labelIv = Base64.decode(spLabelIv, Base64.DEFAULT);
             key = mDataEncryption.decryptString(keyCipher, keyIv);
             label = mDataEncryption.decryptString(labelCipher, labelIv);
+
         } else {
             key = mDataEncryption.decryptString(keyCipher);
             label = mDataEncryption.decryptString(labelCipher);
