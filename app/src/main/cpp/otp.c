@@ -4,7 +4,7 @@
 #include <time.h>
 
 #define MAX_MESSAGE_LENGTH 4096
-#define OFFSET_START 9
+#define OFFSET_START 10
 #define N_BYTE 4
 #define OFFSET_END (OFFSET_START + N_BYTE)
 
@@ -433,6 +433,9 @@ int generateOtpDigits(char *key, int key_length, char* digest)
 
     hmac_sha1(key, key_length, str, 10, digest);
 
+    //Input vector for checking if output match the correct one: 1f8698690e02ca16618550ef7f19da8e945b555a
+    //strncpy( digest, "\x1f\x86\x98\x69\x0e\x02\xca\x16\x61\x85\x50\xef\x7f\x19\xda\x8e\x94\x5b\x55\x5a" , 20 );
+
     //Just for debug purpose
 
     LOGD("---------------------------------------------------------------------");
@@ -470,6 +473,9 @@ int generateOtpDigits(char *key, int key_length, char* digest)
 
     // Get last 6 digits
     digits = digits % 1000000;
+
+    LOGD(">>> Code %d", digits);
+    LOGD("\n\n\n");
 
     free(slice);
 
