@@ -3,7 +3,7 @@ extern "C" {
 #endif
 
     void generateotp(char *key, int key_length, char *digest);
-    int generateOtpDigits(char *key, int key_length);
+    int generateOtpDigits(char *key, int key_length, char* digest);
 #ifdef __cplusplus
 }
 #endif

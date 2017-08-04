@@ -38,16 +38,21 @@ Java_com_datablink_diogenes_otp_MainActivity_generateOtp(JNIEnv *env, jobject th
 
 extern "C" JNIEXPORT  jint JNICALL
 Java_com_datablink_diogenes_otp_MainActivity_generateOtpDigits(JNIEnv *env, jobject instance,
-                                                               jstring key_) {
+                                                               jstring key) {
 
-    const char *constKeyLocal = env->GetStringUTFChars(key_, 0);
+    const char *constKeyLocal = env->GetStringUTFChars(key, 0);
     char* keyLocal = (char*)constKeyLocal;
 
     int keysize = 32;
 
-    int digits = generateOtpDigits(keyLocal,keysize);
+    char* digest= (char*)malloc(20);
+    memset(digest, 0, 20);
 
+    int digits = generateOtpDigits(keyLocal,keysize, digest);
+
+    free(digest);
     free(keyLocal);
+
 
     return digits;
 

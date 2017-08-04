@@ -419,7 +419,7 @@ void generateotp( char *key, int key_length,  char *digest)
     LOGD("---------------------------------------------------------------------");
 }
 
-int generateOtpDigits(char *key, int key_length)
+int generateOtpDigits(char *key, int key_length, char* digest)
 {
 
     struct timespec tms;
@@ -430,9 +430,6 @@ int generateOtpDigits(char *key, int key_length)
     char str[10];
 
     sprintf(str, "%d", t);
-
-    char* digest= (char*)malloc(20);
-    memset(digest, 0, 20);
 
     hmac_sha1(key, key_length, str, 10, digest);
 
@@ -474,7 +471,6 @@ int generateOtpDigits(char *key, int key_length)
     // Get last 6 digits
     digits = digits % 1000000;
 
-    free(digest);
     free(slice);
 
     return digits;
@@ -485,8 +481,11 @@ void printByte(char* bytes, int size){
     char *b = (char*)malloc(size*3);
     char *bp = b;
 
+    char* bytesCpy = (char*)malloc(size);
+    strncpy(bytesCpy, bytes, size);
+
     // To prevent a buffer overflow, digest must be unsigned char
-    unsigned char* unsignedDigest = (unsigned char*) bytes;
+    unsigned char* unsignedDigest = (unsigned char*) bytesCpy;
 
     for (int x = 0; x < size; x++) {
         bp += sprintf(bp, "|%02x", unsignedDigest[x]);
@@ -494,5 +493,6 @@ void printByte(char* bytes, int size){
     LOGD(">>> %s|", b);
     LOGD("---------------------------------------------------------------------");
 
+    free(bytesCpy);
 
 }
