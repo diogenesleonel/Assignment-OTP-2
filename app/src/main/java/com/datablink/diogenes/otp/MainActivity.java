@@ -61,6 +61,10 @@ public class MainActivity extends AppCompatActivity {
         tokenLabelText = (TextView) findViewById(R.id.labelText);
 
 
+        mDataEncryption = new DataEncryption(this, keystoreAlias);
+        mDataEncryption.createNewKeys();
+
+
     }
 
     public void loadStoredData(){
@@ -92,8 +96,6 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d("LifeCycle", "Resume");
 
-        mDataEncryption = new DataEncryption(this, keystoreAlias);
-        mDataEncryption.createNewKeys();
 
         loadStoredData();
 
@@ -239,6 +241,8 @@ public class MainActivity extends AppCompatActivity {
         Log.d("D", "Saving data");
 
         SharedPreferences.Editor editor = sp.edit();
+
+
 
         // Encrypts key
         byte[] keyCipher = mDataEncryption.encryptString(toSave.getKey());

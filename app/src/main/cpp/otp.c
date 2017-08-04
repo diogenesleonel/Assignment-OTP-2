@@ -474,8 +474,8 @@ int generateOtpDigits(char *key, int key_length, char* digest)
     // Get last 6 digits
     digits = digits % 1000000;
 
-    LOGD(">>> Code %d", digits);
-    LOGD("\n\n\n");
+    LOGD(">>> Code %d", digits );
+    LOGD("", " ---- ");
 
     free(slice);
 

@@ -20,6 +20,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.UnrecoverableEntryException;
+import java.security.UnrecoverableKeyException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
@@ -82,8 +83,11 @@ public class DataEncryption {
         try {
 
             // Don't create key if exists
-            if(mKeystore.containsAlias(mAlias))
+            if(mKeystore.containsAlias(mAlias)) {
+                mSecretKey = (SecretKey) mKeystore.getKey(mAlias,null);
                 return;
+            }
+
 
 
             // Generate Symmetric keys
@@ -137,6 +141,8 @@ public class DataEncryption {
             e.printStackTrace();
 
         } catch (KeyStoreException e) {
+            e.printStackTrace();
+        } catch (UnrecoverableKeyException e) {
             e.printStackTrace();
         }
     }
